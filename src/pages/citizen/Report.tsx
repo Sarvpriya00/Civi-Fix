@@ -20,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -414,9 +415,9 @@ export default function CitizenReport() {
                 <CardContent className="space-y-6">
                   {/* Hotspot Toggle */}
                   <div className="flex items-center justify-between">
-                    <FormLabel htmlFor="hotspot" className="text-sm">
+                    <Label htmlFor="hotspot" className="text-sm">
                       High-traffic area?
-                    </FormLabel>
+                    </Label>
                     <Switch
                       id="hotspot"
                       checked={severityInputs.is_hotspot}
@@ -428,9 +429,9 @@ export default function CitizenReport() {
 
                   {/* User Severity */}
                   <div className="space-y-3">
-                    <FormLabel className="text-sm">
+                    <Label className="text-sm">
                       How severe is this issue?
-                    </FormLabel>
+                    </Label>
                     <RadioGroup
                       value={severityInputs.user_severity.toString()}
                       onValueChange={(value) =>
@@ -447,9 +448,9 @@ export default function CitizenReport() {
                       ].map((option) => (
                         <div key={option.value} className="flex items-center space-x-2">
                           <RadioGroupItem value={option.value} id={`severity-${option.value}`} />
-                          <FormLabel htmlFor={`severity-${option.value}`} className="text-sm">
+                          <Label htmlFor={`severity-${option.value}`} className="text-sm">
                             {option.label}
-                          </FormLabel>
+                          </Label>
                         </div>
                       ))}
                     </RadioGroup>
@@ -457,9 +458,9 @@ export default function CitizenReport() {
 
                   {/* Radius */}
                   <div className="space-y-2">
-                    <FormLabel className="text-sm">
+                    <Label className="text-sm">
                       Affected area radius ({severityInputs.radius}m)
-                    </FormLabel>
+                    </Label>
                     <Slider
                       value={[severityInputs.radius]}
                       onValueChange={([value]) =>
@@ -473,9 +474,9 @@ export default function CitizenReport() {
 
                   {/* Location Boost */}
                   <div className="space-y-2">
-                    <FormLabel className="text-sm">
+                    <Label className="text-sm">
                       Near important facility? ({severityInputs.location_boost}/20)
-                    </FormLabel>
+                    </Label>
                     <Slider
                       value={[severityInputs.location_boost]}
                       onValueChange={([value]) =>
