@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -74,6 +75,7 @@ export function Navigation({ className }: NavigationProps) {
           <span className="text-xl font-bold">CivicFix</span>
         </Link>
         <div className="flex items-center space-x-4">
+          <ThemeToggle />
           <Link to="/about">
             <Button variant="ghost">About</Button>
           </Link>
@@ -116,6 +118,7 @@ export function Navigation({ className }: NavigationProps) {
       </div>
 
       <div className="flex items-center space-x-4">
+        <ThemeToggle />
         <Badge variant="secondary" className="capitalize">
           {user.role}
         </Badge>

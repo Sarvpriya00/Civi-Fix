@@ -7,7 +7,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Progress } from '@/components/ui/progress';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
@@ -30,8 +42,11 @@ import {
   MapPin, 
   FileText, 
   Calculator,
-  Upload
+  Upload,
+  Check,
+  ChevronsUpDown
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const reportSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
@@ -49,6 +64,7 @@ export default function CitizenReport() {
   const navigate = useNavigate();
   const currentUser = getCurrentUser();
   const { addReport } = useReportStore();
+  const [open, setOpen] = useState(false);
   
   const [severityInputs, setSeverityInputs] = useState<SeverityInputs>({
     is_hotspot: false,
@@ -61,22 +77,19 @@ export default function CitizenReport() {
     category_combo: 5,
   });
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors, isSubmitting },
-  } = useForm<ReportForm>({
+  const form = useForm<ReportForm>({
     resolver: zodResolver(reportSchema),
     defaultValues: {
       latitude: 12.9716,
       longitude: 77.5946,
       address: 'Bangalore, Karnataka',
+      title: '',
+      category: '',
+      description: '',
     },
   });
 
-  const selectedCategory = watch('category');
+  const selectedCategory = form.watch('category');
   const severityResult = selectedCategory 
     ? calculateSeverity(selectedCategory, severityInputs)
     : null;
@@ -85,9 +98,9 @@ export default function CitizenReport() {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setValue('latitude', position.coords.latitude);
-          setValue('longitude', position.coords.longitude);
-          setValue('address', `Lat: ${position.coords.latitude}, Lng: ${position.coords.longitude}`);
+          form.setValue('latitude', position.coords.latitude);
+          form.setValue('longitude', position.coords.longitude);
+          form.setValue('address', `Lat: ${position.coords.latitude}, Lng: ${position.coords.longitude}`);
           toast({
             title: "Location detected",
             description: "Your current location has been set.",
@@ -174,123 +187,214 @@ export default function CitizenReport() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    {/* Title */}
-                    <div className="space-y-2">
-                      <Label htmlFor="title">Issue Title</Label>
-                      <Input
-                        id="title"
-                        placeholder="Brief description of the issue"
-                        {...register('title')}
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                      {/* Title */}
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Issue Title</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Brief description of the issue" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                      {errors.title && (
-                        <p className="text-sm text-destructive">{errors.title.message}</p>
-                      )}
-                    </div>
 
-                    {/* Category */}
-                    <div className="space-y-2">
-                      <Label htmlFor="category">Category</Label>
-                      <Select onValueChange={(value) => setValue('category', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select issue category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {ISSUE_CATEGORIES.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.category && (
-                        <p className="text-sm text-destructive">{errors.category.message}</p>
-                      )}
-                    </div>
+                      {/* Category */}
+                      <FormField
+                        control={form.control}
+                        name="category"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>Category</FormLabel>
+                            <Popover open={open} onOpenChange={setOpen}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    className={cn(
+                                      "w-full justify-between",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    {field.value
+                                      ? ISSUE_CATEGORIES.find(
+                                          (category) => category.id === field.value
+                                        )?.name
+                                      : "Select issue category"}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-full p-0">
+                                <Command>
+                                  <CommandInput placeholder="Search categories..." />
+                                  <CommandEmpty>No category found.</CommandEmpty>
+                                  <CommandList>
+                                    <CommandGroup>
+                                      {ISSUE_CATEGORIES.map((category) => (
+                                        <CommandItem
+                                          value={category.name}
+                                          key={category.id}
+                                          onSelect={() => {
+                                            form.setValue("category", category.id);
+                                            setOpen(false);
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              category.id === field.value
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                            )}
+                                          />
+                                          <div className="flex flex-col">
+                                            <span>{category.name}</span>
+                                            <span className="text-xs text-muted-foreground">
+                                              {category.department}
+                                            </span>
+                                          </div>
+                                        </CommandItem>
+                                      ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    {/* Photo Upload */}
-                    <div className="space-y-2">
-                      <Label htmlFor="photo">Photo (Optional)</Label>
-                      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                        <Camera className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Take a photo to help us understand the issue
-                        </p>
-                        <Button type="button" variant="outline" size="sm">
-                          <Upload className="mr-2 h-4 w-4" />
-                          Upload Photo
-                        </Button>
-                      </div>
-                    </div>
+                      {/* Photo Upload */}
+                      <FormField
+                        control={form.control}
+                        name="photoUrl"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Photo (Optional)</FormLabel>
+                            <FormControl>
+                              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                                <Camera className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  Take a photo to help us understand the issue
+                                </p>
+                                <Button type="button" variant="outline" size="sm">
+                                  <Upload className="mr-2 h-4 w-4" />
+                                  Upload Photo
+                                </Button>
+                              </div>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
 
-                    {/* Location */}
-                    <div className="space-y-4">
-                      <Label>Location</Label>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="latitude" className="text-xs">Latitude</Label>
-                          <Input
-                            id="latitude"
-                            type="number"
-                            step="any"
-                            {...register('latitude', { valueAsNumber: true })}
+                      {/* Location */}
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-medium">Location</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="latitude"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Latitude</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="any"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="longitude"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Longitude</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="any"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="longitude" className="text-xs">Longitude</Label>
-                          <Input
-                            id="longitude"
-                            type="number"
-                            step="any"
-                            {...register('longitude', { valueAsNumber: true })}
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="address" className="text-xs">Address</Label>
-                        <Input
-                          id="address"
-                          placeholder="Street address or landmark"
-                          {...register('address')}
+                        <FormField
+                          control={form.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Address</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Street address or landmark"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="mt-2"
+                                onClick={handleLocationDetect}
+                              >
+                                <MapPin className="mr-2 h-4 w-4" />
+                                Detect Current Location
+                              </Button>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="mt-2"
-                          onClick={handleLocationDetect}
-                        >
-                          <MapPin className="mr-2 h-4 w-4" />
-                          Detect Current Location
-                        </Button>
                       </div>
-                      {errors.address && (
-                        <p className="text-sm text-destructive">{errors.address.message}</p>
-                      )}
-                    </div>
 
-                    {/* Description */}
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
-                      <Textarea
-                        id="description"
-                        placeholder="Provide detailed information about the issue, including when you noticed it and any safety concerns..."
-                        rows={4}
-                        {...register('description')}
+                      {/* Description */}
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Provide detailed information about the issue, including when you noticed it and any safety concerns..."
+                                rows={4}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                      {errors.description && (
-                        <p className="text-sm text-destructive">{errors.description.message}</p>
-                      )}
-                    </div>
 
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? 'Submitting...' : 'Submit Report'}
-                    </Button>
-                  </form>
+                      <Button 
+                        type="submit" 
+                        className="w-full" 
+                        disabled={form.formState.isSubmitting}
+                      >
+                        {form.formState.isSubmitting ? 'Submitting...' : 'Submit Report'}
+                      </Button>
+                    </form>
+                  </Form>
                 </CardContent>
               </Card>
             </div>
@@ -307,12 +411,12 @@ export default function CitizenReport() {
                     Help us prioritize by providing additional context
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                   {/* Hotspot Toggle */}
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="hotspot" className="text-sm">
+                    <FormLabel htmlFor="hotspot" className="text-sm">
                       High-traffic area?
-                    </Label>
+                    </FormLabel>
                     <Switch
                       id="hotspot"
                       checked={severityInputs.is_hotspot}
@@ -323,26 +427,39 @@ export default function CitizenReport() {
                   </div>
 
                   {/* User Severity */}
-                  <div className="space-y-2">
-                    <Label className="text-sm">
-                      How severe is this issue? ({severityInputs.user_severity}/4)
-                    </Label>
-                    <Slider
-                      value={[severityInputs.user_severity]}
-                      onValueChange={([value]) =>
-                        setSeverityInputs(prev => ({ ...prev, user_severity: value }))
+                  <div className="space-y-3">
+                    <FormLabel className="text-sm">
+                      How severe is this issue?
+                    </FormLabel>
+                    <RadioGroup
+                      value={severityInputs.user_severity.toString()}
+                      onValueChange={(value) =>
+                        setSeverityInputs(prev => ({ ...prev, user_severity: parseInt(value) }))
                       }
-                      max={4}
-                      step={1}
-                      className="w-full"
-                    />
+                      className="flex flex-col space-y-2"
+                    >
+                      {[
+                        { value: "0", label: "Minor" },
+                        { value: "1", label: "Low" },
+                        { value: "2", label: "Medium" },
+                        { value: "3", label: "High" },
+                        { value: "4", label: "Critical" },
+                      ].map((option) => (
+                        <div key={option.value} className="flex items-center space-x-2">
+                          <RadioGroupItem value={option.value} id={`severity-${option.value}`} />
+                          <FormLabel htmlFor={`severity-${option.value}`} className="text-sm">
+                            {option.label}
+                          </FormLabel>
+                        </div>
+                      ))}
+                    </RadioGroup>
                   </div>
 
                   {/* Radius */}
                   <div className="space-y-2">
-                    <Label className="text-sm">
+                    <FormLabel className="text-sm">
                       Affected area radius ({severityInputs.radius}m)
-                    </Label>
+                    </FormLabel>
                     <Slider
                       value={[severityInputs.radius]}
                       onValueChange={([value]) =>
@@ -356,9 +473,9 @@ export default function CitizenReport() {
 
                   {/* Location Boost */}
                   <div className="space-y-2">
-                    <Label className="text-sm">
+                    <FormLabel className="text-sm">
                       Near important facility? ({severityInputs.location_boost}/20)
-                    </Label>
+                    </FormLabel>
                     <Slider
                       value={[severityInputs.location_boost]}
                       onValueChange={([value]) =>
@@ -372,21 +489,26 @@ export default function CitizenReport() {
 
                   {/* Priority Preview */}
                   {severityResult && (
-                    <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Priority Level:</span>
-                        <PriorityBadge priority={severityResult.priority} />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Score:</span>
-                        <span className="text-sm font-mono">{severityResult.score}/100</span>
-                      </div>
-                      {selectedCategory && (
-                        <div className="text-xs text-muted-foreground">
-                          Department: {getCategoryById(selectedCategory)?.department}
+                    <Card className="bg-muted/50">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Priority Level:</span>
+                          <PriorityBadge priority={severityResult.priority} />
                         </div>
-                      )}
-                    </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Score:</span>
+                            <span className="text-sm font-mono">{severityResult.score}/100</span>
+                          </div>
+                          <Progress value={severityResult.score} className="w-full" />
+                        </div>
+                        {selectedCategory && (
+                          <div className="text-xs text-muted-foreground">
+                            Department: {getCategoryById(selectedCategory)?.department}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   )}
                 </CardContent>
               </Card>
