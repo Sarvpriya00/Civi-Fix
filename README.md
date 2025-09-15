@@ -1,73 +1,71 @@
-# Welcome to your Lovable project
+# 🏙️ Civi-Fix
 
-## Project info
+Civi-Fix is a *citizen grievance redressal platform* designed to streamline how civic issues are reported, managed, and resolved.  
+It bridges the gap between *citizens and municipal bodies* by providing an easy-to-use web platform for complaint submission, classification, and tracking.  
 
-**URL**: https://lovable.dev/projects/c183e9d5-4a61-4671-ad3f-068ac93ebf9b
+This project was built as part of the *Smart India Hackathon (SIH)*.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 🚀 Features
 
-**Use Lovable**
+•⁠  ⁠📍 *Geo-tagging*: Report issues with automatic location capture and mapping.  
+•⁠  ⁠🗂️ *Smart Categorization*: Issues are classified (roads, electricity, water, waste, etc.) for proper routing.  
+•⁠  ⁠⚡ *Priority Assignment*: Issues are marked with severity levels for faster resolution of critical problems.  
+•⁠  ⁠🖥️ *Authority Dashboard*: Municipal officers get a central dashboard to track, update, and resolve complaints.  
+•⁠  ⁠📊 *Analytics & Reports*: Visual insights into complaint trends, resolution times, and department performance.  
+•⁠  ⁠💬 *Feedback Loop*: Citizens can rate the resolution and provide comments after closure.  
+•⁠  ⁠🌐 *Responsive UI*: Optimized for mobile and desktop for seamless citizen access.  
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c183e9d5-4a61-4671-ad3f-068ac93ebf9b) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🛠️ Tech Stack
 
-**Use your preferred IDE**
+•⁠  ⁠*Framework*: [Next.js](https://nextjs.org/) (with TypeScript)  
+•⁠  ⁠*Styling*: [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)  
+•⁠  ⁠*Maps/Geo*: (Planned) Google Maps API / Leaflet.js for issue mapping  
+•⁠  ⁠*Backend*: Node.js (Express) / API Routes (Next.js server functions)  
+•⁠  ⁠*Database*: MongoDB / PostgreSQL (configurable)  
+•⁠  ⁠*Deployment*: Vercel / Docker-ready  
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 📂 Project Structure
+    Civi-Fix/
+    ├── app/                # Main app routes (Next.js App Router)
+    ├── components/         # Reusable UI components
+    ├── hooks/              # Custom React hooks
+    ├── lib/                # Utility functions, helpers
+    ├── public/             # Static assets (images, icons)
+    ├── styles/             # Global styles, Tailwind setup
+    ├── next.config.mjs     # Next.js configuration
+    ├── tailwind.config.ts  # Tailwind configuration
+    ├── tsconfig.json       # TypeScript configuration
+    └── README.md           # Project documentation
+---
 
-Follow these steps:
+## ⚙️ Installation & Setup
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 1. Clone the repository
+```bash
+git clone https://github.com/Sarvpriya00/Civi-Fix.git
+cd Civi-Fix
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 2. Install dependencies
+```bash
+npm install
+# or
+yarn install
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 3. Run the development server
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Team
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/c183e9d5-4a61-4671-ad3f-068ac93ebf9b) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Built with ❤️ for Smart India Hackathon by Team Synapse
